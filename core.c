@@ -95,7 +95,8 @@ ul_core_if(world *w, list *l)
 	obj *cond, *tf, *ff;
 	list *t;
 
-	if (t = list_nth(l, 1)) {
+	t = list_nth(l, 1);
+	if (t) {
 		if (t->rest && t->rest->rest)
 			goto error;
 	} else {
@@ -116,4 +117,60 @@ ul_core_if(world *w, list *l)
 	error:
 		fprintf(stderr, "Argument count mismatch\n");
 		exit(1);
+}
+
+static int
+arg_to_fn(obj *o, function *f)
+{
+
+	if (o->type == UL_SYMBOL){
+		f->arg_name = o;
+		f->flags |= UL_FN_ONEARG;
+		return 0;
+	}
+	if (o->type != UL_LIST && o->data.list->rest)
+		return !0;
+
+	o = o->data.list->head;
+
+	if (o) {
+		if (o->type == UL_SYMBOL) {
+			f->flags |= UL_FN_VARARG;
+			f->arg_name = o;
+			return 0;
+		}
+		else {
+			return !0;
+		}
+	} else { 
+		f->flags |= UL_FN_NOARG;
+		f->arg_name = NULL;
+		return 0;
+	}
+}
+
+obj *
+ul_core_lambda(world *w, list *l)
+{
+	obj *arg, *body, *o;
+	function *f;
+
+	if ((l == NULL) || (l->rest == NULL) || (l->rest->rest)) {
+		fprintf(stderr, "expected 2 arguments\n");
+		exit(1);
+	}
+
+	arg = l->head;
+	body = l->rest->head;
+
+	f = xcalloc(sizeof(function), 1);
+	arg_to_fn(arg, f);
+	f->fn = body;
+	f->env = envcopyall(w->env);
+
+	o = xmalloc(sizeof(obj));
+	o->type = UL_FUNCTION;
+	o->data.fn = f;
+
+	return o;
 }

@@ -107,6 +107,24 @@ treeset(tree *t, obj *k, obj *v)
 	goto tco;
 }
 
+tree *
+treecopy(tree *t)
+{
+	tree *n;
+
+	if (t == NULL)
+		return NULL;
+
+	n = xmalloc(sizeof(tree));
+	n->key = t->key;
+	n->val = t->val;
+
+	n->l = treecopy(t->l);
+	n->r = treecopy(t->r);
+
+	return n;
+}
+
 env *
 envnew(env *old)
 {
@@ -137,6 +155,35 @@ obj *
 envset(env *e, obj *k, obj *v)
 {
 	return treeset(e->head, k, v);
+}
+
+env *
+envcopy(env *e)
+{
+	env *n;
+
+	n = xmalloc(sizeof(env));
+	n->head = treecopy(e->head);
+	n->rest = NULL;
+
+	return n;
+}
+
+env *
+envcopyall(env *e)
+{
+	env *n, *i;
+
+	for (n = NULL; e && e->head; e = e->rest)
+		if (n) {
+			i->rest = envcopy(e);
+			i = i->rest;
+		} else {
+			n = envcopy(e);
+			i = n;
+		}
+
+	return n;
 }
 
 list *

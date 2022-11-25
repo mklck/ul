@@ -51,9 +51,26 @@ struct ul_list {
 	ul_list *rest;
 };
 
+/* struct ul_function
+	void *fn
+		If function is builtin, its pointer to function
+		obj * (*fn)(world *, TYPE), where type is:
+			- obj * when f takes one argument
+			- list * when f takes many arguments
+			- void * set to NULL, when no argument is passed
+		If function is defined by programmer, fn points to
+		function body of type obj *
+	ul_obj *arg_name
+		Symbol with name of the argument passed to user function.
+		NULL if function does not take any arguments.
+	ul_env *env
+		Copy of the environment at the moment of function creation.
+*/
+
 struct ul_function {
 	void *fn;
 	enum ul_fn_flags flags;
+	ul_obj *arg_name;
 	ul_env *env;
 };
 
@@ -88,15 +105,19 @@ ul_list* ul_list_nth(ul_list *, int);
 ul_obj* ul_envget(ul_env *, ul_obj *);
 ul_obj* ul_envset(ul_env *, ul_obj *, ul_obj *);
 ul_env* ul_envnew(ul_env *);
+ul_env* ul_envcopy(ul_env *);
+ul_env* ul_envcopyall(ul_env *);
 
 ul_obj* ul_treeget(ul_tree *, ul_obj*);
 ul_obj* ul_treeset(ul_tree *, ul_obj*, ul_obj*);
+ul_tree* ul_treecopy(ul_tree *);
 
-ul_obj* ul_core_add   (ul_world *, ul_list *);
-ul_obj* ul_core_quote (ul_world *, ul_obj *);
-ul_obj* ul_core_def   (ul_world *, ul_list *);
-ul_obj* ul_core_if    (ul_world *, ul_list *);
-ul_obj* ul_core_let   (ul_world *, ul_list *);
-ul_obj* ul_core_do    (ul_world *, ul_list *);
+ul_obj* ul_core_add    (ul_world *, ul_list *);
+ul_obj* ul_core_quote  (ul_world *, ul_obj *);
+ul_obj* ul_core_def    (ul_world *, ul_list *);
+ul_obj* ul_core_if     (ul_world *, ul_list *);
+ul_obj* ul_core_let    (ul_world *, ul_list *);
+ul_obj* ul_core_do     (ul_world *, ul_list *);
+ul_obj* ul_core_lambda (ul_world *, ul_list *);
 
 #endif

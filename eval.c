@@ -48,31 +48,64 @@ list_to_argtype(list *l)
 		return UL_FN_VARARG;
 }
 
-static obj *
-run_builtin(world *w, function *f, list *args)
+static void
+check_arglist(function *f, list *args)
 {
-	obj * (*fn) (world *, void *);
-
 	if ((list_to_argtype(args) & f->flags) == 0) {
 		fprintf(stderr, "mismatch of argument count, got: \n\t");
 		printlist(stderr, args);
 		fprintf(stderr, "\n");
 		exit(1);
 	}
+}
+
+static void *
+extract_arg(enum ul_fn_flags f, list *args)
+{
+	if (f & UL_FN_NOARG)
+		return NULL;
+	else if (f & UL_FN_ONEARG)
+		return args->head;
+	else
+		return args;
+}
+
+static obj *
+run_builtin(world *w, function *f, list *args)
+{
+	obj * (*fn) (world *, void *);
+	void *arg;
 
 	fn = f->fn;
-	if (f->flags & UL_FN_NOARG)
-		return fn(w, NULL);
-	else if (f->flags & UL_FN_ONEARG)
-		return fn(w, args->head);
-	else
-		return fn(w, args);
+	arg = extract_arg(f->flags, args);
+
+	return fn(w, arg);
 }
 
 static obj *
 run_userdefined(world *w, function *f, list *args)
 {
-	return NULL;
+	obj *fn, *arg, *ev;
+	env *old;
+
+	if (f->flags & UL_FN_ONEARG)
+		arg = args->head;
+	else if (f->flags & UL_FN_VARARG) {
+		arg = xmalloc(sizeof(obj));
+		arg->type = UL_LIST;
+		arg->data.list = args;
+	}
+
+	fn = f->fn;
+	old = w->env;
+	w->env = envnew(f->env);
+	if (f->arg_name)
+		envset(w->env, f->arg_name, arg);
+
+	ev = eval(w, fn);
+	w->env = old;
+
+	return ev;
 }
 
 obj *
@@ -104,6 +137,7 @@ eval(world *w, obj *o)
 	else
 		l = l->rest;
 
+	check_arglist(f, l);
 	if (f->flags & UL_FN_BUILTIN)
 		return run_builtin(w, f, l);
 	else

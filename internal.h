@@ -16,10 +16,12 @@ typedef ul_tree tree;
 #define envget ul_envget
 #define envset ul_envset
 #define envnew ul_envnew
+#define envcopy ul_envcopy
+#define envcopyall ul_envcopyall
 
 #define treeget ul_treeget
 #define treeset ul_treeset
-#define deltree ul_deltree
+#define treecopy ul_treecopy
 
 void *xmalloc(size_t);
 void *xcalloc(size_t, size_t);

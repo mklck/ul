@@ -56,53 +56,68 @@ tkn_cappend(token *t, char c)
 	t->str[t->sz] = 0;
 }
 
-static token
-lex_int(parser *p)
+static void
+lex_int(parser *p, token *t)
 {
-	token t = {.type = TKN_INT, .str = NULL};
 
-	tkn_cappend(&t, p->buf);
+	t->type = TKN_INT;
 
-	while (isdigit(next(p)))
-		tkn_cappend(&t, p->buf);
-
-	return t;
+	for (; isdigit(p->buf); next(p))
+		tkn_cappend(t, p->buf);
 }
 
-static token
-lex_symbol(parser *p)
+static int
+issymbol(int c)
 {
-	token t = {.type = TKN_SYMBOL, .str = NULL};
+	char *s = "=+-/*<>";
 
-	tkn_cappend(&t, p->buf);
+	if (isalpha(c))
+		return !0;
 
-	while (isalpha(next(p)))
-		tkn_cappend(&t, p->buf);
+	for (; *s; s++)
+		if (*s == c)
+			return !0;
+	return 0;
+}
 
-	if ((t.sz == 3) && (strcmp(t.str, "nil") == 0)) {
-		free(t.str);
-		t.type = TKN_NIL;
-	} else if ((t.sz == 4) && (strcmp(t.str, "true") == 0)) {
-		free(t.str);
-		t.type = TKN_TRUE;
+static void
+lex_symbol(parser *p, token *t)
+{
+
+	t->type = TKN_SYMBOL;
+
+	for (;issymbol(p->buf); next(p))
+		tkn_cappend(t, p->buf);
+
+	if ((t->sz == 3) && (strcmp(t->str, "nil") == 0)) {
+		free(t->str);
+		t->type = TKN_NIL;
+	} else if ((t->sz == 4) && (strcmp(t->str, "true") == 0)) {
+		free(t->str);
+		t->type = TKN_TRUE;
 	}
-
-	return t;
 }
 
 static token
 lex(parser *p)
 {
+	token t = {0};
 	skip_space(p);
 
 	SINGLE_CHAR_TKN('(', TKN_LIST_START)
 	SINGLE_CHAR_TKN(')', TKN_LIST_END)
 
-	if (isdigit(p->buf) || (p->buf == '-'))
-		return lex_int(p);
-	else
-		return lex_symbol(p);
+	if (p->buf == '-') {
+		tkn_cappend(&t, '-');
+		next(p);
+	}
 
+	if (isdigit(p->buf))
+		lex_int(p, &t);
+	else
+		lex_symbol(p, &t);
+
+	return t;
 }
 
 list *

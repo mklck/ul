@@ -25,8 +25,10 @@ eval_ast(world *w, obj *o)
 
 	if (o->type == UL_SYMBOL){
 		t = envget(w->env, o);
-		if (t == NULL)
+		if (t == NULL) {
 			fprintf(stderr, "symbol '%s' not found\n", o->data.str.str);
+			t = ul_nil;
+		}
 	} else if (o->type == UL_LIST) {
 		t = xmalloc(sizeof(obj));
 		t->type = UL_LIST;

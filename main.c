@@ -11,7 +11,7 @@ typedef struct {
 } builtin_fn;
 
 builtin_fn builtins[] = {
-	{"add",    ul_core_add, UL_FN_VARARG},
+	{"+",    ul_core_add, UL_FN_VARARG},
 	{"quote",  ul_core_quote, UL_FN_ONEARG | UL_FN_MACRO},
 	{"def",    ul_core_def, UL_FN_VARARG | UL_FN_MACRO},
 	{"if",     ul_core_if, UL_FN_VARARG | UL_FN_MACRO},

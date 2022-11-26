@@ -96,11 +96,16 @@ struct ul_world {
 
 extern ul_obj *ul_nil, *ul_true;
 
+int ul_objcmp(ul_obj *, ul_obj *);
+int ul_listcmp(ul_list *, ul_list *);
+
 ul_obj* ul_eval(ul_world *, ul_obj *);
 ul_obj* ul_parse(ul_parser *);
 
 ul_list* ul_lappend(ul_list *, void *);
 ul_list* ul_list_nth(ul_list *, int);
+int ul_list_size(ul_list *);
+int ul_list_nsize(ul_list *, int);
 
 ul_obj* ul_envget(ul_env *, ul_obj *);
 ul_obj* ul_envset(ul_env *, ul_obj *, ul_obj *);
@@ -118,6 +123,11 @@ ul_obj* ul_core_lt     (ul_world *, ul_list *);
 ul_obj* ul_core_gt     (ul_world *, ul_list *);
 ul_obj* ul_core_leqt   (ul_world *, ul_list *);
 ul_obj* ul_core_geqt   (ul_world *, ul_list *);
+ul_obj* ul_core_eq     (ul_world *, ul_list *);
+ul_obj* ul_core_cmp    (ul_world *, ul_list *);
+ul_obj* ul_core_not    (ul_world *, ul_obj *);
+ul_obj* ul_core_and    (ul_world *, ul_list *);
+ul_obj* ul_core_or     (ul_world *, ul_list *);
 ul_obj* ul_core_quote  (ul_world *, ul_obj *);
 ul_obj* ul_core_def    (ul_world *, ul_list *);
 ul_obj* ul_core_if     (ul_world *, ul_list *);

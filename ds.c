@@ -5,6 +5,8 @@
 #include "ul.h"
 #include "internal.h"
 
+#define LIST_NULL_OR_EMPTY(l) (((l) == NULL) || ((l)->head == NULL))
+
 static obj _ul_nil = {.type = UL_NIL};
 static obj _ul_true = {.type = UL_TRUE};
 
@@ -36,15 +38,39 @@ xstrcmp(string a, string b)
 		return t;
 
 	for (t = 0; t < a.sz; t++)
-		if (a.str[t] > b.str[t])
+		if (a.str[t] < b.str[t])
 			return 1;
-		else if (a.str[t] < b.str[t])
+		else if (a.str[t] > b.str[t])
 			return -1;
 	
 	return 0; 
 }
 
-static int
+int
+list_cmp(list *a, list *b)
+{
+	int t;
+
+	for (; a && a->head; a = a->rest) {
+		if (b && b->head) {
+			t = objcmp(a->head, b->head);
+			if (t)
+				return t;
+		} else {
+			break;
+		}
+		b = b->rest;
+	}
+
+	if (LIST_NULL_OR_EMPTY(a) && LIST_NULL_OR_EMPTY(b))
+		return 0;
+	else if (b)
+		return -1;
+	else 
+		return 1;
+}
+
+int
 objcmp(obj *a, obj *b)
 {
 
@@ -53,6 +79,10 @@ objcmp(obj *a, obj *b)
 
 	if (a->type == UL_SYMBOL)
 		return xstrcmp(a->data.str, b->data.str);
+	else if (a->type == UL_INT)
+		return b->data.i - a->data.i;
+	else if (a->type == UL_LIST)
+		return list_cmp(a->data.list, b->data.list);
 	else
 		return 0;
 }
@@ -193,4 +223,27 @@ list_nth(list *l, int i)
 		if (i-- == 0)
 			return l;
 	return NULL;
+}
+
+int
+list_size(list *l)
+{
+	int t;
+
+	for (t = 0; l && l->head; l = l->rest)
+		t++;
+
+	return t;
+}
+
+int
+list_nsize(list *l, int n)
+{
+	int t;
+
+	for (t = 0; l && l->head; l = l->rest)
+		if (++t > n)
+			return n;
+
+	return t;
 }

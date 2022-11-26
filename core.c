@@ -4,19 +4,16 @@
 #include "ul.h"
 #include "internal.h"
 
-#define NUM_COMPARISON_FN(name, cmp) \
+#define COMPARING_FN(NAME, EXPR) \
 obj * \
-name(world *w, list *l) \
+NAME(world *w, list *l) \
 { \
 	obj *t1 = NULL, *t2 = NULL; \
 \
 	for (; l && l->head; l = l->rest) \
 		if (t1) { \
 			t2 = l->head; \
-			if ((t1->type != UL_INT) && (t2->type != UL_INT)) \
-				err_invtype(0, 0); \
-			else if (t1->data.i cmp t2->data.i) \
-				return ul_nil; \
+			EXPR \
 			t1 = t2; \
 		} else { \
 			t1 = l->head; \
@@ -25,12 +22,36 @@ name(world *w, list *l) \
 	return ul_true; \
 }
 
+#define NUM_COMPARE(t1, t2, EXPR) \
+if(((t1)->type != UL_INT) || (t2)->type != UL_INT) \
+	err_invtype(UL_INT, 0); \
+else if ((t1)->data.i EXPR (t2)->data.i) \
+	return ul_nil;
+
 static void
 err_invtype(enum ul_obj_type exp, enum ul_obj_type got)
 {
 	fprintf(stderr, "invalid data type");
 	exit(1);
 }
+
+COMPARING_FN(ul_core_lt, NUM_COMPARE(t1, t2, >=))
+COMPARING_FN(ul_core_gt, NUM_COMPARE(t1, t2, <=))
+COMPARING_FN(ul_core_leqt, NUM_COMPARE(t1, t2, >))
+COMPARING_FN(ul_core_geqt, NUM_COMPARE(t1, t2, <))
+
+COMPARING_FN(ul_core_eq,
+	if (objcmp(t1, t2))
+		return ul_nil;
+)
+COMPARING_FN(ul_core_and,
+	if ((t1->type == UL_NIL) || (t2->type == UL_NIL))
+		return ul_nil;
+)
+COMPARING_FN(ul_core_or,
+	if ((t1->type == UL_NIL) && (t2->type == UL_NIL))
+		return ul_nil;
+)
 
 obj *
 ul_core_add(world *w, list *l)
@@ -87,11 +108,6 @@ ul_core_sub(world *w, list *l)
 
 	return o;
 }
-
-NUM_COMPARISON_FN(ul_core_lt, >=)
-NUM_COMPARISON_FN(ul_core_gt, <=)
-NUM_COMPARISON_FN(ul_core_leqt, >)
-NUM_COMPARISON_FN(ul_core_geqt, <)
 
 obj *
 ul_core_quote(world *w, obj *o)
@@ -235,4 +251,34 @@ ul_core_lambda(world *w, list *l)
 	o->data.fn = f;
 
 	return o;
+}
+
+obj *
+ul_core_not(world *w, obj *o)
+{
+	return (o->type == UL_NIL) ? ul_true : ul_nil;
+}
+
+obj *
+ul_core_cmp(world *w, list *l)
+{
+	obj *a, *b, *t;
+	int sz;
+
+	sz = list_nsize(l, 3);
+	if (sz != 2)
+		goto error;
+
+	a = l->head;
+	b = l->rest->head;
+
+	t = xmalloc(sizeof(obj));
+	t->type = UL_INT;
+	t->data.i = objcmp(a, b);
+
+	return t;
+
+	error:
+	fprintf(stderr, "expected 2 arguments, got %d\n", sz);
+	exit(1);
 }

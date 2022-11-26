@@ -13,6 +13,11 @@ typedef ul_tree tree;
 #define lappend ul_lappend
 #define list_nth ul_list_nth
 
+#define objcmp ul_objcmp
+#define listcmp ul_listcmp
+#define list_size ul_list_size
+#define list_nsize ul_list_nsize
+
 #define envget ul_envget
 #define envset ul_envset
 #define envnew ul_envnew

@@ -113,6 +113,11 @@ ul_obj* ul_treeset(ul_tree *, ul_obj*, ul_obj*);
 ul_tree* ul_treecopy(ul_tree *);
 
 ul_obj* ul_core_add    (ul_world *, ul_list *);
+ul_obj* ul_core_sub    (ul_world *, ul_list *);
+ul_obj* ul_core_lt     (ul_world *, ul_list *);
+ul_obj* ul_core_gt     (ul_world *, ul_list *);
+ul_obj* ul_core_leqt   (ul_world *, ul_list *);
+ul_obj* ul_core_geqt   (ul_world *, ul_list *);
 ul_obj* ul_core_quote  (ul_world *, ul_obj *);
 ul_obj* ul_core_def    (ul_world *, ul_list *);
 ul_obj* ul_core_if     (ul_world *, ul_list *);

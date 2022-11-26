@@ -4,6 +4,27 @@
 #include "ul.h"
 #include "internal.h"
 
+#define NUM_COMPARISON_FN(name, cmp) \
+obj * \
+name(world *w, list *l) \
+{ \
+	obj *t1 = NULL, *t2 = NULL; \
+\
+	for (; l && l->head; l = l->rest) \
+		if (t1) { \
+			t2 = l->head; \
+			if ((t1->type != UL_INT) && (t2->type != UL_INT)) \
+				err_invtype(0, 0); \
+			else if (t1->data.i cmp t2->data.i) \
+				return ul_nil; \
+			t1 = t2; \
+		} else { \
+			t1 = l->head; \
+		} \
+\
+	return ul_true; \
+}
+
 static void
 err_invtype(enum ul_obj_type exp, enum ul_obj_type got)
 {
@@ -30,6 +51,47 @@ ul_core_add(world *w, list *l)
 
 	return o;
 }
+
+obj *
+ul_core_sub(world *w, list *l)
+{
+	int t = 0;
+	obj *o;
+
+	if (!(l && l->head)) {
+		o = xmalloc(sizeof(obj));
+		o->type = UL_INT;
+		o->data.i = 0;
+		return o;
+	} else {
+		o = l->head;
+	}
+
+	if (o->type != UL_INT)
+		err_invtype(UL_INT, o->type);
+
+	t = o->data.i;
+	l = l->rest;
+
+	for (; l && l->head; l = l->rest) {
+		o = l->head;
+		if (o->type != UL_INT)
+			err_invtype(UL_INT, o->type);
+		else
+			t -= o->data.i;
+	}
+
+	o = xmalloc(sizeof(obj));
+	o->type = UL_INT;
+	o->data.i = t;
+
+	return o;
+}
+
+NUM_COMPARISON_FN(ul_core_lt, >=)
+NUM_COMPARISON_FN(ul_core_gt, <=)
+NUM_COMPARISON_FN(ul_core_leqt, >)
+NUM_COMPARISON_FN(ul_core_geqt, <)
 
 obj *
 ul_core_quote(world *w, obj *o)

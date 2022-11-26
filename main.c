@@ -11,12 +11,17 @@ typedef struct {
 } builtin_fn;
 
 builtin_fn builtins[] = {
-	{"+",    ul_core_add, UL_FN_VARARG},
-	{"quote",  ul_core_quote, UL_FN_ONEARG | UL_FN_MACRO},
-	{"def",    ul_core_def, UL_FN_VARARG | UL_FN_MACRO},
-	{"if",     ul_core_if, UL_FN_VARARG | UL_FN_MACRO},
-	{"let",    ul_core_let, UL_FN_VARARG | UL_FN_MACRO},
-	{"do",     ul_core_do, UL_FN_VARARG | UL_FN_MACRO},
+	{"+",      ul_core_add,    UL_FN_VARARG},
+	{"-",      ul_core_sub,    UL_FN_VARARG},
+	{"<",      ul_core_lt,     UL_FN_VARARG},
+	{">",      ul_core_gt,     UL_FN_VARARG},
+	{"<=",     ul_core_leqt,   UL_FN_VARARG},
+	{">=",     ul_core_geqt,   UL_FN_VARARG},
+	{"quote",  ul_core_quote,  UL_FN_ONEARG | UL_FN_MACRO},
+	{"def",    ul_core_def,    UL_FN_VARARG | UL_FN_MACRO},
+	{"if",     ul_core_if,     UL_FN_VARARG | UL_FN_MACRO},
+	{"let",    ul_core_let,    UL_FN_VARARG | UL_FN_MACRO},
+	{"do",     ul_core_do,     UL_FN_VARARG | UL_FN_MACRO},
 	{"lambda", ul_core_lambda, UL_FN_VARARG | UL_FN_MACRO},
 	{0}
 };

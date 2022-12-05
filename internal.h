@@ -10,8 +10,12 @@ typedef ul_tree tree;
 
 #define eval ul_eval
 #define parse ul_parse
-#define lappend ul_lappend
+#define lappend ul_list_append
+#define list_append ul_list_append
 #define list_nth ul_list_nth
+#define list_copy ul_list_copy
+#define list_end ul_list_end
+#define list_cons ul_list_cons
 
 #define objcmp ul_objcmp
 #define listcmp ul_listcmp
@@ -27,6 +31,8 @@ typedef ul_tree tree;
 #define treeget ul_treeget
 #define treeset ul_treeset
 #define treecopy ul_treecopy
+
+#define scanlist ul_scanlist
 
 void *xmalloc(size_t);
 void *xcalloc(size_t, size_t);

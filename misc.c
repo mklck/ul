@@ -1,8 +1,17 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "ul.h"
 #include "internal.h"
+
+#define SCANLIST_CHECKTYPE(c, o, t, p) \
+	case (c): \
+	if ((o)->type != (t)) \
+		return -1; \
+	*(p) = (o); \
+	break;
 
 void *
 err_mem(void)
@@ -71,4 +80,52 @@ printlist(FILE *f, list *l)
 
 	fprintf(f, ")");
 	fflush(f);
+}
+
+static int
+scanlist_sz(char *s)
+{
+	int l;
+
+	for (l = 0; *s; s++) {
+		l++;
+		if (strchr("lsifnta", *s) == NULL)
+			return -1;
+	}
+	return l;
+}
+
+int
+scanlist(list *l, char *fmt, ...)
+{
+	va_list ptrs;
+	int sz, i;
+	obj *t, **o;
+
+	sz = scanlist_sz(fmt);
+
+	if (sz != list_size(l))
+		return -1;
+
+	va_start(ptrs, fmt);
+
+	for (i = 0; l && l->head; l = l->rest) {
+		t = l->head;
+		o = va_arg(ptrs, obj**);
+		switch (fmt[i]) {
+			SCANLIST_CHECKTYPE('l', t, UL_LIST, o)
+			SCANLIST_CHECKTYPE('s', t, UL_SYMBOL, o)
+			SCANLIST_CHECKTYPE('i', t, UL_INT, o)
+			SCANLIST_CHECKTYPE('f', t, UL_FUNCTION, o)
+			SCANLIST_CHECKTYPE('n', t, UL_NIL, o)
+			SCANLIST_CHECKTYPE('t', t, UL_TRUE, o)
+			case 'a':
+				*o = t;
+				break;
+		}
+		i++;
+	}
+
+	va_end(ptrs);
+	return 0;
 }

@@ -102,8 +102,11 @@ int ul_listcmp(ul_list *, ul_list *);
 ul_obj* ul_eval(ul_world *, ul_obj *);
 ul_obj* ul_parse(ul_parser *);
 
-ul_list* ul_lappend(ul_list *, void *);
+ul_list* ul_list_append(ul_list *, void *);
 ul_list* ul_list_nth(ul_list *, int);
+ul_list* ul_list_copy(ul_list *);
+ul_list* ul_list_end(ul_list *);
+ul_list* ul_list_cons(ul_list *, void *);
 int ul_list_size(ul_list *);
 int ul_list_nsize(ul_list *, int);
 
@@ -117,22 +120,48 @@ ul_obj* ul_treeget(ul_tree *, ul_obj*);
 ul_obj* ul_treeset(ul_tree *, ul_obj*, ul_obj*);
 ul_tree* ul_treecopy(ul_tree *);
 
+ul_obj* ul_core_head   (ul_world *, ul_obj  *);
+ul_obj* ul_core_rest   (ul_world *, ul_obj  *);
+ul_obj* ul_core_len    (ul_world *, ul_obj  *);
+ul_obj* ul_core_cons   (ul_world *, ul_list *);
+ul_obj* ul_core_append (ul_world *, ul_list *);
+ul_obj* ul_core_nth    (ul_world *, ul_list *);
+ul_obj* ul_core_list   (ul_world *, ul_list *);
+
 ul_obj* ul_core_add    (ul_world *, ul_list *);
 ul_obj* ul_core_sub    (ul_world *, ul_list *);
 ul_obj* ul_core_lt     (ul_world *, ul_list *);
 ul_obj* ul_core_gt     (ul_world *, ul_list *);
 ul_obj* ul_core_leqt   (ul_world *, ul_list *);
 ul_obj* ul_core_geqt   (ul_world *, ul_list *);
+
 ul_obj* ul_core_eq     (ul_world *, ul_list *);
 ul_obj* ul_core_cmp    (ul_world *, ul_list *);
 ul_obj* ul_core_not    (ul_world *, ul_obj *);
 ul_obj* ul_core_and    (ul_world *, ul_list *);
 ul_obj* ul_core_or     (ul_world *, ul_list *);
+
 ul_obj* ul_core_quote  (ul_world *, ul_obj *);
 ul_obj* ul_core_def    (ul_world *, ul_list *);
 ul_obj* ul_core_if     (ul_world *, ul_list *);
 ul_obj* ul_core_let    (ul_world *, ul_list *);
 ul_obj* ul_core_do     (ul_world *, ul_list *);
 ul_obj* ul_core_lambda (ul_world *, ul_list *);
+
+/* ul_scanlist
+	Scan fixed length list and extract objects into corresponding type pointers.
+	fmt is string which contains characters:
+	- l for list
+	- s for symbol
+	- i for integer
+	- f for function
+	- n for nil
+	- t for true
+	- a for any
+	For example "li" means that list must have as first argument list, and as second
+	argument int. List can not have more elements.
+
+*/
+int ul_scanlist(ul_list *, char *, ...);
 
 #endif

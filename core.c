@@ -282,3 +282,129 @@ ul_core_cmp(world *w, list *l)
 	fprintf(stderr, "expected 2 arguments, got %d\n", sz);
 	exit(1);
 }
+
+obj *
+ul_core_head(world *w, obj *o)
+{
+	list *l;
+
+	if (o->type != UL_LIST) {
+		fprintf(stderr, "expected list\n");
+		exit(1);
+	}
+
+	l = o->data.list;
+
+	return l->head ? l->head : ul_nil;
+}
+
+obj *
+ul_core_rest(world *w, obj *o)
+{
+	list *l;
+	obj *n;
+
+	if (o->type != UL_LIST) {
+		fprintf(stderr, "expected list\n");
+		exit(1);
+	}
+
+	l = o->data.list;
+
+	if (l->rest) {
+		n = xmalloc(sizeof(obj));
+		n->type = UL_LIST;
+		n->data.list = l->rest;
+		return n;
+	} else {
+		return ul_nil;
+	}
+}
+
+obj *
+ul_core_cons(world *w, list *l)
+{
+	obj *o, *arg, *no;
+
+	if (scanlist(l, "la", &arg, &o)) {
+		fprintf(stderr, "Expected list\n");
+		exit(1);
+	}
+
+	no = xmalloc(sizeof(obj));
+	no->type = UL_LIST;
+	no->data.list = list_cons(arg->data.list, o);
+
+	return no;
+}
+
+obj *
+ul_core_nth(world *w, list *l)
+{
+	obj *index, *arg;
+	list *a;
+	int i;
+
+	if (scanlist(l, "li", &arg, &index)) {
+		fprintf(stderr, "expected list and integer\n");
+		exit(1);
+	}
+
+	a = arg->data.list;
+	i = index->data.i;
+
+	a = list_nth(a, i);
+	
+	return a ? a->head : ul_nil;
+}
+
+obj *
+ul_core_append(world *w, list *l)
+{
+	obj *arg, *o;
+	list *cp, *cpe;
+
+	if (scanlist(l, "la", &arg, &o)) {
+		fprintf(stderr, "Expected list and object\n");
+		exit(1);
+	}
+
+	cp = list_copy(arg->data.list);
+	cpe = list_end(cp);
+	lappend(cpe, o);
+
+	o = xmalloc(sizeof(obj));
+	o->type = UL_LIST;
+	o->data.list = cp;
+
+	return o;
+}
+
+obj *
+ul_core_len(world *w, obj *o)
+{
+	obj *n;
+
+	if (o->type != UL_LIST) {
+		fprintf(stderr, "Expected list\n");
+		exit(1);
+	}
+
+	n = xmalloc(sizeof(obj));
+	n->type = UL_INT;
+	n->data.i = list_size(o->data.list);
+
+	return n;
+}
+
+obj *
+ul_core_list(world *w, list *l)
+{
+	obj *n;
+
+	n = xmalloc(sizeof(obj));
+	n->type = UL_LIST;
+	n->data.list = l ? l : xcalloc(sizeof(list), 1);
+
+	return n;
+}

@@ -28,6 +28,14 @@ builtin_fn builtins[] = {
 	{"let",    ul_core_let,    UL_FN_VARARG | UL_FN_MACRO},
 	{"do",     ul_core_do,     UL_FN_VARARG | UL_FN_MACRO},
 	{"lambda", ul_core_lambda, UL_FN_VARARG | UL_FN_MACRO},
+
+	{"head",   ul_core_head,   UL_FN_ONEARG},
+	{"rest",   ul_core_rest,   UL_FN_ONEARG},
+	{"len",    ul_core_len,    UL_FN_ONEARG},
+	{"cons",   ul_core_cons,   UL_FN_VARARG},
+	{"append", ul_core_append, UL_FN_VARARG},
+	{"nth",    ul_core_nth,    UL_FN_VARARG},
+	{"list",   ul_core_list,   UL_FN_VARARG},
 	{0}
 };
 

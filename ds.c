@@ -13,7 +13,7 @@ static obj _ul_true = {.type = UL_TRUE};
 obj *ul_nil = &_ul_nil, *ul_true = &_ul_true;
 
 list *
-lappend(list *l, void *o)
+list_append(list *l, void *o)
 {
 	list *n;
 
@@ -21,6 +21,22 @@ lappend(list *l, void *o)
 		n = xcalloc(sizeof(list), 1);
 		l->rest = n;
 		n->head = o;
+		return n;
+	} else {
+		l->head = o;
+		return l;
+	}
+}
+
+list *
+list_cons(list *l, void *o)
+{
+	list *n;
+
+	if (l->head) {
+		n = xmalloc(sizeof(list));
+		n->head = o;
+		n->rest = l;
 		return n;
 	} else {
 		l->head = o;
@@ -68,6 +84,29 @@ list_cmp(list *a, list *b)
 		return -1;
 	else 
 		return 1;
+}
+
+list *
+list_copy(list *l)
+{
+	list *n, *ni;
+
+	n = xcalloc(sizeof(list), 1);
+	ni = n;
+
+	for (; l && l->head; l = l->rest)
+			ni = list_append(ni, l->head);
+
+	return n;
+}
+
+list *
+list_end(list *l)
+{
+	for (; l && l->head; l = l->rest)
+		if (l->rest == NULL)
+			return l;
+	return l;
 }
 
 int

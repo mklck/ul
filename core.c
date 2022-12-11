@@ -4,6 +4,8 @@
 #include "ul.h"
 #include "internal.h"
 
+#define STR_CONST(s) ((string) {.sz = sizeof(s), .str = (s)})
+
 #define COMPARING_FN(NAME, EXPR) \
 obj * \
 NAME(world *w, list *l) \
@@ -407,4 +409,33 @@ ul_core_list(world *w, list *l)
 	n->data.list = l ? l : xcalloc(sizeof(list), 1);
 
 	return n;
+}
+
+obj *
+ul_core_typeof(world *w, obj *o)
+{
+	obj *n;
+	int i;
+	struct {
+		enum ul_obj_type type;
+		string str;
+	} typetable[] = {
+		{UL_LIST,     STR_CONST("list")},
+		{UL_INT,      STR_CONST("int")},
+		{UL_SYMBOL,   STR_CONST("symbol")},
+		{UL_FUNCTION, STR_CONST("function")},
+		{UL_NIL,      STR_CONST("nil")},
+		{UL_TRUE,     STR_CONST("true")}
+	};
+
+	n = xmalloc(sizeof(obj));
+	n->type = UL_SYMBOL;
+
+	for (i = 0; i < sizeof(typetable); i++)
+		if (typetable[i].type == o->type) {
+			n->data.str = typetable[i].str;
+			return n;
+		}
+
+	return NULL;
 }

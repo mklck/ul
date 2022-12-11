@@ -141,12 +141,14 @@ ul_obj* ul_core_not    (ul_world *, ul_obj *);
 ul_obj* ul_core_and    (ul_world *, ul_list *);
 ul_obj* ul_core_or     (ul_world *, ul_list *);
 
+ul_obj* ul_core_typeof (ul_world *, ul_obj *);
 ul_obj* ul_core_quote  (ul_world *, ul_obj *);
 ul_obj* ul_core_def    (ul_world *, ul_list *);
 ul_obj* ul_core_if     (ul_world *, ul_list *);
 ul_obj* ul_core_let    (ul_world *, ul_list *);
 ul_obj* ul_core_do     (ul_world *, ul_list *);
 ul_obj* ul_core_lambda (ul_world *, ul_list *);
+
 
 /* ul_scanlist
 	Scan fixed length list and extract objects into corresponding type pointers.

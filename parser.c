@@ -69,7 +69,7 @@ lex_int(parser *p, token *t)
 static int
 issymbol(int c)
 {
-	char *s = "=+-/*<>";
+	char *s = "=+-/*<>?_";
 
 	if (isalpha(c))
 		return !0;

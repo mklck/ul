@@ -22,6 +22,7 @@ builtin_fn builtins[] = {
 	{"not",    ul_core_not,    UL_FN_ONEARG},
 	{"and",    ul_core_and,    UL_FN_VARARG},
 	{"or",     ul_core_or,     UL_FN_VARARG},
+
 	{"quote",  ul_core_quote,  UL_FN_ONEARG | UL_FN_MACRO},
 	{"def",    ul_core_def,    UL_FN_VARARG | UL_FN_MACRO},
 	{"if",     ul_core_if,     UL_FN_VARARG | UL_FN_MACRO},
@@ -29,6 +30,7 @@ builtin_fn builtins[] = {
 	{"do",     ul_core_do,     UL_FN_VARARG | UL_FN_MACRO},
 	{"lambda", ul_core_lambda, UL_FN_VARARG | UL_FN_MACRO},
 
+	{"typeof", ul_core_typeof, UL_FN_ONEARG},
 	{"head",   ul_core_head,   UL_FN_ONEARG},
 	{"rest",   ul_core_rest,   UL_FN_ONEARG},
 	{"len",    ul_core_len,    UL_FN_ONEARG},

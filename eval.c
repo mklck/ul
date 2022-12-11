@@ -84,11 +84,12 @@ run_builtin(world *w, function *f, list *args)
 	return fn(w, arg);
 }
 
-static obj *
-run_userdefined(world *w, function *f, list *args)
+obj *
+run_userfn(world *w, function *f, list *args)
 {
 	obj *fn, *arg, *ev;
 	env *old;
+	function *old_self;
 
 	if (f->flags & UL_FN_ONEARG)
 		arg = args->head;
@@ -104,8 +105,13 @@ run_userdefined(world *w, function *f, list *args)
 	if (f->arg_name)
 		envset(w->env, f->arg_name, arg);
 
+	old_self = w->self;
+	w->self = f;
+
 	ev = eval(w, fn);
+
 	w->env = old;
+	w->self = old_self;
 
 	return ev;
 }
@@ -125,10 +131,12 @@ eval(world *w, obj *o)
 	if (l->head == NULL)
 		return o;
 
-	head = eval_ast(w, l->head);
+	head = eval(w, l->head);
 
 	if (head->type != UL_FUNCTION) {
-		fprintf(stderr, "expected function\n");
+		fprintf(stderr, "expected function, got: ");
+		printobj(stderr, head);
+		fprintf(stderr, "\n");
 		exit(1);
 	}
 
@@ -143,5 +151,5 @@ eval(world *w, obj *o)
 	if (f->flags & UL_FN_BUILTIN)
 		return run_builtin(w, f, l);
 	else
-		return run_userdefined(w, f, l);
+		return run_userfn(w, f, l);
 }

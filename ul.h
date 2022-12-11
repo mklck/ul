@@ -92,6 +92,7 @@ struct ul_parser {
 
 struct ul_world {
 	ul_env *env;
+	ul_function *self;
 };
 
 extern ul_obj *ul_nil, *ul_true;
@@ -148,6 +149,7 @@ ul_obj* ul_core_if     (ul_world *, ul_list *);
 ul_obj* ul_core_let    (ul_world *, ul_list *);
 ul_obj* ul_core_do     (ul_world *, ul_list *);
 ul_obj* ul_core_lambda (ul_world *, ul_list *);
+ul_obj* ul_core_recur  (ul_world *, ul_list *);
 
 
 /* ul_scanlist

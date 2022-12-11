@@ -34,6 +34,7 @@ builtin_fn builtins[] = {
 	{"head",   ul_core_head,   UL_FN_ONEARG},
 	{"rest",   ul_core_rest,   UL_FN_ONEARG},
 	{"len",    ul_core_len,    UL_FN_ONEARG},
+	{"recur" , ul_core_recur,  UL_FN_VARARG},
 	{"cons",   ul_core_cons,   UL_FN_VARARG},
 	{"append", ul_core_append, UL_FN_VARARG},
 	{"nth",    ul_core_nth,    UL_FN_VARARG},

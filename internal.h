@@ -43,3 +43,5 @@ void printlist(FILE *, list *);
 
 int list_szlet(list *, int);
 int list_szget(list *, int);
+
+ul_obj *run_userfn(world *, function *, list *);

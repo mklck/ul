@@ -246,7 +246,7 @@ ul_core_lambda(world *w, list *l)
 	f = xcalloc(sizeof(function), 1);
 	arg_to_fn(arg, f);
 	f->fn = body;
-	f->env = envcopyall(w->env);
+	f->env = w->env; // envcopyall(w->env);
 
 	o = xmalloc(sizeof(obj));
 	o->type = UL_FUNCTION;
@@ -438,4 +438,8 @@ ul_core_typeof(world *w, obj *o)
 		}
 
 	return NULL;
+}
+
+obj *ul_core_recur(world *w, list *l) {
+	return run_userfn(w, w->self, l);
 }

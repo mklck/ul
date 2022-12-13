@@ -28,6 +28,11 @@ enum ul_fn_flags {
 	UL_FN_MACRO   = 1 << 4
 };
 
+enum ul_tco_type {
+	UL_NO_TCO,
+	UL_FULL_TCO,
+	UL_PARTIAL_TCO
+};
 
 struct ul_string {
 	unsigned sz;
@@ -93,6 +98,9 @@ struct ul_parser {
 struct ul_world {
 	ul_env *env;
 	ul_function *self;
+
+	void *tco;
+	enum ul_tco_type tco_type;
 };
 
 extern ul_obj *ul_nil, *ul_true;

@@ -87,7 +87,7 @@ main(int argc, char **argv)
 {
 	parser p;
 	obj *o;
-	world w;
+	world w = {0};
 
 	p.next = (int (*)(void *)) getc;
 	p.priv = stdin;

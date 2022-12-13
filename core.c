@@ -31,9 +31,11 @@ else if ((t1)->data.i EXPR (t2)->data.i) \
 	return ul_nil;
 
 static void
-err_invtype(enum ul_obj_type exp, enum ul_obj_type got)
+err_invtype(enum ul_obj_type exp, obj *o)
 {
-	fprintf(stderr, "invalid data type");
+	fprintf(stderr, "invalid data type, got: ");
+	printobj(stderr, o);
+	fprintf(stderr, "\n");
 	exit(1);
 }
 
@@ -64,7 +66,7 @@ ul_core_add(world *w, list *l)
 	for (; l && l->head; l = l->rest){
 		o = l->head;
 		if (o->type != UL_INT)
-			err_invtype(UL_INT, o->type);
+			err_invtype(UL_INT, o);
 		else
 			t += o->data.i; 
 	}
@@ -91,7 +93,7 @@ ul_core_sub(world *w, list *l)
 	}
 
 	if (o->type != UL_INT)
-		err_invtype(UL_INT, o->type);
+		err_invtype(UL_INT, o);
 
 	t = o->data.i;
 	l = l->rest;
@@ -99,7 +101,7 @@ ul_core_sub(world *w, list *l)
 	for (; l && l->head; l = l->rest) {
 		o = l->head;
 		if (o->type != UL_INT)
-			err_invtype(UL_INT, o->type);
+			err_invtype(UL_INT, o);
 		else
 			t -= o->data.i;
 	}
@@ -128,15 +130,18 @@ ul_core_let(world *w, list *l)
 		if (t) {
 			envset(w->env, t, l->head);
 			t = NULL;
-		} else
+		} else {
 			t = l->head;
+		}
 
 	if (t == NULL) {
 		fprintf(stderr,  "Expected expression\n");
 		exit(1);
 	}
 
-	return eval(w, t);
+	w->tco = t;
+
+	return NULL;
 }
 
 obj *
@@ -163,10 +168,15 @@ ul_core_do(world *w, list *l)
 {
 	obj *t;
 
-	for (; l && l->head; l= l->rest)
-		t = eval(w, l->head);
+	for (; l && l->head; l = l->rest) {
+		if (l->rest == NULL)
+			break;
+		eval(w, l->head);
+	}
 
-	return t;
+	w->tco = l->head;
+
+	return NULL;
 }
 
 obj *
@@ -190,10 +200,13 @@ ul_core_if(world *w, list *l)
 	cond = eval(w, cond);
 
 	if (cond->type != UL_NIL)
-		return eval(w, tf);
+		w->tco = tf;
+	else if (ff)
+		w->tco = ff;
 	else
-		return ff ? eval(w, ff) : ul_nil;
+		return ul_nil;
 
+	return NULL;
 	error:
 		fprintf(stderr, "Argument count mismatch\n");
 		exit(1);
@@ -246,7 +259,7 @@ ul_core_lambda(world *w, list *l)
 	f = xcalloc(sizeof(function), 1);
 	arg_to_fn(arg, f);
 	f->fn = body;
-	f->env = w->env; // envcopyall(w->env);
+	f->env = envnew(w->env);
 
 	o = xmalloc(sizeof(obj));
 	o->type = UL_FUNCTION;
@@ -440,6 +453,12 @@ ul_core_typeof(world *w, obj *o)
 	return NULL;
 }
 
-obj *ul_core_recur(world *w, list *l) {
-	return run_userfn(w, w->self, l);
+obj *
+ul_core_recur(world *w, list *l)
+{
+
+	w->tco = l;
+	w->tco_type = UL_PARTIAL_TCO;
+
+	return NULL;
 }

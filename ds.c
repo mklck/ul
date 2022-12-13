@@ -133,7 +133,7 @@ treeget(tree *t, obj *k)
 
 	tco:
 
-	if (t == NULL)
+	if ((t == NULL) || (t->key == NULL))
 		return NULL;
 
 	c = objcmp(t->key, k);
@@ -285,4 +285,16 @@ list_nsize(list *l, int n)
 			return n;
 
 	return t;
+}
+
+obj *
+list_to_obj(list *l)
+{
+	obj *o;
+
+	o = xmalloc(sizeof(obj));
+	o->type = UL_LIST;
+	o->data.list = l;
+
+	return o;
 }

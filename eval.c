@@ -4,6 +4,15 @@
 #include "ul.h"
 #include "internal.h"
 
+static void
+err_expfn(obj *o)
+{
+	fprintf(stderr, "expected function, got: ");
+	printobj(stderr, o);
+	fprintf(stderr, "\n");
+	exit(1);
+}
+
 static list *
 eval_list(world *w, list *l)
 {
@@ -50,7 +59,7 @@ list_to_argtype(list *l)
 		return UL_FN_VARARG;
 }
 
-static void
+void
 check_arglist(function *f, list *args)
 {
 	if ((list_to_argtype(args) & f->flags) == 0) {
@@ -84,44 +93,42 @@ run_builtin(world *w, function *f, list *args)
 	return fn(w, arg);
 }
 
-obj *
-run_userfn(world *w, function *f, list *args)
+static void
+userfn_setarg(function *f, list *args)
 {
-	obj *fn, *arg, *ev;
-	env *old;
-	function *old_self;
+	obj *arg;
 
 	if (f->flags & UL_FN_ONEARG)
 		arg = args->head;
-	else if (f->flags & UL_FN_VARARG) {
-		arg = xmalloc(sizeof(obj));
-		arg->type = UL_LIST;
-		arg->data.list = args;
-	}
+	else if (f->flags & UL_FN_VARARG)
+		arg = list_to_obj(args);
 
-	fn = f->fn;
-	old = w->env;
-	w->env = envnew(f->env);
 	if (f->arg_name)
-		envset(w->env, f->arg_name, arg);
-
-	old_self = w->self;
-	w->self = f;
-
-	ev = eval(w, fn);
-
-	w->env = old;
-	w->self = old_self;
-
-	return ev;
+		envset(f->env, f->arg_name, arg);
 }
 
-obj *
-eval(world *w, obj *o)
+static world
+new_world(world *w, function *f)
+{
+	world n;
+
+	n = *w;
+	n.env = f->env;
+	n.self = f;
+
+	return n;
+}
+
+static list *
+eval_rest(world *w, function *f, list *l)
+{
+	return (f->flags & UL_FN_MACRO) ? l : eval_list(w, l);
+}
+
+static obj *
+list_from_expr(world *w, obj *o, list **nl)
 {
 	list *l;
-	obj *head;
-	function *f;
 
 	if (o->type != UL_LIST)
 		return eval_ast(w, o);
@@ -130,26 +137,59 @@ eval(world *w, obj *o)
 
 	if (l->head == NULL)
 		return o;
+	
+	*nl = l;
+	return NULL;
+}
+
+obj *
+eval(world *w, obj *o)
+{
+	list *l;
+	obj *head, *evaluated;
+	function *f;
+	world new_w;
+
+	full_tco:
+	w->tco_type = UL_NO_TCO;
+
+	if ((o = list_from_expr(w, o, &l)))
+		return o;
 
 	head = eval(w, l->head);
 
-	if (head->type != UL_FUNCTION) {
-		fprintf(stderr, "expected function, got: ");
-		printobj(stderr, head);
-		fprintf(stderr, "\n");
-		exit(1);
-	}
+	if (head->type != UL_FUNCTION)
+		err_expfn(head);
 
 	f = head->data.fn;
+	l = eval_rest(w, f, l->rest);
 
-	if ((f->flags & UL_FN_MACRO) == 0)
-		l = eval_list(w, l->rest); 
-	else
-		l = l->rest;
+	partial_tco:
 
 	check_arglist(f, l);
-	if (f->flags & UL_FN_BUILTIN)
-		return run_builtin(w, f, l);
-	else
-		return run_userfn(w, f, l);
+
+	if ((f->flags & UL_FN_BUILTIN) == 0) {
+		userfn_setarg(f, l);
+		new_w = new_world(w, f);
+		if (w->tco_type == UL_PARTIAL_TCO) {
+			w = &new_w;
+			o = f->fn;
+			goto full_tco;
+		} else {
+			return eval(&new_w, f->fn);
+		}
+	}
+
+	evaluated = run_builtin(w, f, l);
+
+	if (w->tco_type == UL_NO_TCO) {
+		return evaluated;
+	} else if (w->tco_type == UL_FULL_TCO) {
+		o = w->tco;
+		goto full_tco;
+	} else {
+		f = w->self;
+		l = w->tco;
+		goto partial_tco;
+	}
 }
